@@ -160,7 +160,6 @@ function Gearbox({ currentGear, isShifting }) {
       <Text
         position={[0, 0.4, 0.6]}
         fontSize={0.3}
-        font="/fonts/Inter-Bold.ttf"
         color={isShifting ? "#ffaa00" : "#ffffff"}
       >
         {currentGear}
