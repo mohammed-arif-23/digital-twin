@@ -313,7 +313,7 @@ export default function App() {
             <Card className="bg-black/20 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Engine className="w-5 h-5 text-red-400" />
+                  <Cog className="w-5 h-5 text-red-400" />
                   Engine Control
                 </CardTitle>
               </CardHeader>
