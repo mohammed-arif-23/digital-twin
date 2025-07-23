@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://76446b27-080c-4a73-b62f-8526e193ab7b.preview.emergentagent.com/api"
+BASE_URL = "http://localhost:3000/api"
 TIMEOUT = 30
 
 def print_test_result(test_name, success, details=""):
