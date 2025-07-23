@@ -15,7 +15,7 @@ import {
   Zap, 
   Gauge, 
   Settings,
-  Engine,
+  Cog,
   CircleDot 
 } from 'lucide-react'
 
