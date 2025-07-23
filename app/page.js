@@ -187,7 +187,7 @@ function Car3DScene({
       
       <group position={[0, 1, 0]}>
         <CarBody engineRunning={engineRunning} color={carColor} />
-        <Engine running={engineRunning} rpm={rpm} />
+        <EngineComponent running={engineRunning} rpm={rpm} />
         <Gearbox currentGear={currentGear} isShifting={isShifting} />
         
         {/* Wheels */}
