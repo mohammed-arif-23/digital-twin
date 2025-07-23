@@ -94,7 +94,7 @@ function Wheel({ position, speed, engineRunning }) {
 }
 
 // Engine Component
-function Engine({ running, rpm }) {
+function EngineComponent({ running, rpm }) {
   const engineRef = useRef()
   
   useFrame((state) => {
