@@ -38,47 +38,111 @@ async function handleRoute(request, { params }) {
   try {
     const db = await connectToMongo()
 
-    // Root endpoint - GET /api/root (since /api/ is not accessible with catch-all)
-    if (route === '/root' && method === 'GET') {
-      return handleCORS(NextResponse.json({ message: "Hello World" }))
-    }
-    // Root endpoint - GET /api/root (since /api/ is not accessible with catch-all)
+    // Root endpoint - GET /api/
     if (route === '/' && method === 'GET') {
-      return handleCORS(NextResponse.json({ message: "Hello World" }))
+      return handleCORS(NextResponse.json({ 
+        message: "Digital Twin Car API",
+        version: "1.0.0",
+        endpoints: {
+          "GET /api/": "API information",
+          "POST /api/car-state": "Save car simulation state",
+          "GET /api/car-state": "Get saved car states",
+          "GET /api/car-state/:id": "Get specific car state"
+        }
+      }))
     }
 
-    // Status endpoints - POST /api/status
-    if (route === '/status' && method === 'POST') {
+    // Car state endpoints - POST /api/car-state
+    if (route === '/car-state' && method === 'POST') {
       const body = await request.json()
       
-      if (!body.client_name) {
-        return handleCORS(NextResponse.json(
-          { error: "client_name is required" }, 
-          { status: 400 }
-        ))
-      }
-
-      const statusObj = {
+      const carState = {
         id: uuidv4(),
-        client_name: body.client_name,
-        timestamp: new Date()
+        engineRunning: body.engineRunning || false,
+        currentGear: body.currentGear || 'P',
+        speed: body.speed || 0,
+        rpm: body.rpm || 0,
+        carColor: body.carColor || '#ff6b6b',
+        timestamp: new Date(),
+        sessionId: body.sessionId || uuidv4()
       }
 
-      await db.collection('status_checks').insertOne(statusObj)
-      return handleCORS(NextResponse.json(statusObj))
+      await db.collection('car_states').insertOne(carState)
+      
+      // Remove MongoDB's _id field from response
+      const { _id, ...cleanedCarState } = carState
+      return handleCORS(NextResponse.json(cleanedCarState))
     }
 
-    // Status endpoints - GET /api/status
-    if (route === '/status' && method === 'GET') {
-      const statusChecks = await db.collection('status_checks')
-        .find({})
-        .limit(1000)
+    // Car state endpoints - GET /api/car-state
+    if (route === '/car-state' && method === 'GET') {
+      const url = new URL(request.url)
+      const sessionId = url.searchParams.get('sessionId')
+      const limit = parseInt(url.searchParams.get('limit')) || 50
+
+      let query = {}
+      if (sessionId) {
+        query.sessionId = sessionId
+      }
+
+      const carStates = await db.collection('car_states')
+        .find(query)
+        .limit(limit)
+        .sort({ timestamp: -1 })
         .toArray()
 
       // Remove MongoDB's _id field from response
-      const cleanedStatusChecks = statusChecks.map(({ _id, ...rest }) => rest)
+      const cleanedCarStates = carStates.map(({ _id, ...rest }) => rest)
       
-      return handleCORS(NextResponse.json(cleanedStatusChecks))
+      return handleCORS(NextResponse.json(cleanedCarStates))
+    }
+
+    // Car state endpoints - GET /api/car-state/:id
+    if (route.startsWith('/car-state/') && method === 'GET') {
+      const id = route.split('/car-state/')[1]
+      
+      const carState = await db.collection('car_states').findOne({ id })
+      
+      if (!carState) {
+        return handleCORS(NextResponse.json(
+          { error: "Car state not found" }, 
+          { status: 404 }
+        ))
+      }
+
+      // Remove MongoDB's _id field from response
+      const { _id, ...cleanedCarState } = carState
+      return handleCORS(NextResponse.json(cleanedCarState))
+    }
+
+    // Car metrics endpoint - GET /api/metrics
+    if (route === '/metrics' && method === 'GET') {
+      const totalStates = await db.collection('car_states').countDocuments()
+      const uniqueSessions = await db.collection('car_states').distinct('sessionId')
+      
+      const recentStates = await db.collection('car_states')
+        .find({})
+        .limit(100)
+        .sort({ timestamp: -1 })
+        .toArray()
+
+      const avgSpeed = recentStates.length > 0 
+        ? recentStates.reduce((sum, state) => sum + (state.speed || 0), 0) / recentStates.length
+        : 0
+
+      const avgRpm = recentStates.length > 0
+        ? recentStates.reduce((sum, state) => sum + (state.rpm || 0), 0) / recentStates.length
+        : 0
+
+      const metrics = {
+        totalSimulations: totalStates,
+        uniqueSessions: uniqueSessions.length,
+        averageSpeed: Math.round(avgSpeed * 100) / 100,
+        averageRPM: Math.round(avgRpm),
+        lastUpdated: new Date()
+      }
+
+      return handleCORS(NextResponse.json(metrics))
     }
 
     // Route not found

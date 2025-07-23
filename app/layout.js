@@ -1,14 +1,14 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Next.js MongoDB Template',
-  description: 'A simple template with App Router, MongoDB, and shadcn/ui',
+  title: 'Digital Twin Car - 3D Interactive Vehicle Simulation',
+  description: 'Real-time 3D car visualization with engine, gear, and speed controls using Next.js and Three.js',
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body className="antialiased">
         {children}
       </body>
     </html>
