@@ -53,9 +53,19 @@ graph TD;
   B --> C[Database (MongoDB Collections)]
 ```
 
-- **Frontend**: Interactive 3D visualization, UI controls, real-time telemetry
-- **Backend**: REST API for state, metrics, and analytics; MongoDB for persistence
-- **Physics Engine**: Custom logic for engine, transmission, temperature, fuel, and performance
+---
+
+### UI Flow Diagram
+
+```mermaid
+graph LR;
+  User((User)) -->|Interacts| UI[UI Components]
+  UI -->|Controls| CarScene[3D Car Scene]
+  CarScene -->|Updates| Physics[Physics Engine]
+  Physics -->|Telemetry| Dashboard[Telemetry & Analytics]
+  UI -->|API Calls| API[Backend API]
+  API -->|Stores| DB[(MongoDB)]
+```
 
 ---
 
