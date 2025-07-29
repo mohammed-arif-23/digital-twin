@@ -45,16 +45,6 @@ A full-stack, real-time digital twin simulator of a V8 engine-powered car. This 
 
 ---
 
-## 🏗️ Architecture
-
-```mermaid
-graph TD;
-  A[Frontend (Next.js + React + Three.js)] --> B[Backend (Node.js + MongoDB)]
-  B --> C[Database (MongoDB Collections)]
-```
-
----
-
 ### UI Flow Diagram
 
 ```mermaid
