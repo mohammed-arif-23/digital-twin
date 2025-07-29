@@ -2,7 +2,6 @@ import { MongoClient } from 'mongodb'
 import { v4 as uuidv4 } from 'uuid'
 import { NextResponse } from 'next/server'
 
-// MongoDB connection
 let client
 let db
 
@@ -15,7 +14,6 @@ async function connectToMongo() {
   return db
 }
 
-// Helper function to handle CORS
 function handleCORS(response) {
   response.headers.set('Access-Control-Allow-Origin', '*')
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
@@ -24,12 +22,10 @@ function handleCORS(response) {
   return response
 }
 
-// OPTIONS handler for CORS
 export async function OPTIONS() {
   return handleCORS(new NextResponse(null, { status: 200 }))
 }
 
-// Route handler function
 async function handleRoute(request, { params }) {
   const { path = [] } = params
   const route = `/${path.join('/')}`
@@ -38,7 +34,6 @@ async function handleRoute(request, { params }) {
   try {
     const db = await connectToMongo()
 
-    // Root endpoint - GET /api/
     if (route === '/' && method === 'GET') {
       return handleCORS(NextResponse.json({ 
         message: "Digital Twin Car API",
@@ -52,7 +47,6 @@ async function handleRoute(request, { params }) {
       }))
     }
 
-    // Car state endpoints - POST /api/car-state
     if (route === '/car-state' && method === 'POST') {
       const body = await request.json()
       
@@ -62,19 +56,19 @@ async function handleRoute(request, { params }) {
         currentGear: body.currentGear || 'P',
         speed: body.speed || 0,
         rpm: body.rpm || 0,
-        carColor: body.carColor || '#ff6b6b',
-        timestamp: new Date(),
+        temperature: body.temperature || 85,
+        fuel: body.fuel || 60,
+        mileage: body.mileage || 0,
+        timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
         sessionId: body.sessionId || uuidv4()
       }
 
       await db.collection('car_states').insertOne(carState)
       
-      // Remove MongoDB's _id field from response
       const { _id, ...cleanedCarState } = carState
       return handleCORS(NextResponse.json(cleanedCarState))
     }
 
-    // Car state endpoints - GET /api/car-state
     if (route === '/car-state' && method === 'GET') {
       const url = new URL(request.url)
       const sessionId = url.searchParams.get('sessionId')
@@ -91,13 +85,11 @@ async function handleRoute(request, { params }) {
         .sort({ timestamp: -1 })
         .toArray()
 
-      // Remove MongoDB's _id field from response
       const cleanedCarStates = carStates.map(({ _id, ...rest }) => rest)
       
       return handleCORS(NextResponse.json(cleanedCarStates))
     }
 
-    // Car state endpoints - GET /api/car-state/:id
     if (route.startsWith('/car-state/') && method === 'GET') {
       const id = route.split('/car-state/')[1]
       
@@ -110,12 +102,10 @@ async function handleRoute(request, { params }) {
         ))
       }
 
-      // Remove MongoDB's _id field from response
       const { _id, ...cleanedCarState } = carState
       return handleCORS(NextResponse.json(cleanedCarState))
     }
 
-    // Car metrics endpoint - GET /api/metrics
     if (route === '/metrics' && method === 'GET') {
       const totalStates = await db.collection('car_states').countDocuments()
       const uniqueSessions = await db.collection('car_states').distinct('sessionId')
@@ -134,18 +124,33 @@ async function handleRoute(request, { params }) {
         ? recentStates.reduce((sum, state) => sum + (state.rpm || 0), 0) / recentStates.length
         : 0
 
+      const avgTemperature = recentStates.length > 0
+        ? recentStates.reduce((sum, state) => sum + (state.temperature || 85), 0) / recentStates.length
+        : 85
+
+      const avgMileage = recentStates.length > 0
+        ? recentStates.reduce((sum, state) => sum + (state.mileage || 0), 0) / recentStates.length
+        : 0
+
+      const engineRunningCount = recentStates.filter(state => state.engineRunning).length
+      const engineRunningPercentage = recentStates.length > 0 
+        ? (engineRunningCount / recentStates.length) * 100 
+        : 0
+
       const metrics = {
         totalSimulations: totalStates,
         uniqueSessions: uniqueSessions.length,
         averageSpeed: Math.round(avgSpeed * 100) / 100,
         averageRPM: Math.round(avgRpm),
+        averageTemperature: Math.round(avgTemperature * 100) / 100,
+        averageMileage: Math.round(avgMileage * 100) / 100,
+        engineRunningPercentage: Math.round(engineRunningPercentage * 100) / 100,
         lastUpdated: new Date()
       }
 
       return handleCORS(NextResponse.json(metrics))
     }
 
-    // Route not found
     return handleCORS(NextResponse.json(
       { error: `Route ${route} not found` }, 
       { status: 404 }
@@ -160,7 +165,6 @@ async function handleRoute(request, { params }) {
   }
 }
 
-// Export all HTTP methods
 export const GET = handleRoute
 export const POST = handleRoute
 export const PUT = handleRoute
