@@ -1,208 +1,268 @@
-# V8 Engine Digital Twin Simulator
+<!-- PROJECT BANNER -->
 
-## Project Overview
+<h1 align="center">V8 Engine Digital Twin Simulator 🚗💨</h1>
 
-An advanced real-time digital twin simulation of a V8 engine, featuring dynamic performance analysis, real-time visualization, and interactive controls. The project demonstrates the integration of 3D visualization, real-time physics calculations, and performance optimization systems.
+<p align="center">
+  <b>Real-time, interactive, and visually rich digital twin of a V8 engine-powered car</b>
+</p>
 
-## Key Features
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/Next.js-14.2.3-blue?logo=nextdotjs"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Three.js-0.169.0-black?logo=three.js"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/MongoDB-6.6.0-green?logo=mongodb"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
+</p>
 
-### 1. Engine Specifications
+---
 
-- **Engine Type**: V8
-- **Power Output**: Up to 700hp
-- **Maximum RPM**: 8400
-- **Torque**: 850 Nm
-- **Displacement**: 8 pistons, 2 strokes
-- **Fuel System**: 68-85L tank capacity with 400-850 km range
+## 📑 Table of Contents
 
-### 2. Real-time Performance Analysis
+- [Project Overview](#project-overview)
+- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Features](#features)
+- [Physics & Engine Simulation](#physics--engine-simulation)
+- [3D Visualization & UI Components](#3d-visualization--ui-components)
+- [Backend API & Data Model](#backend-api--data-model)
+- [Data Analytics & Metrics](#data-analytics--metrics)
+- [Setup & Development](#setup--development)
+- [Extensibility & Customization](#extensibility--customization)
+- [Troubleshooting & Tips](#troubleshooting--tips)
+- [Future Enhancements](#future-enhancements)
+- [Credits & License](#credits--license)
 
-- **Efficiency Monitoring**
+---
 
-  - Dynamic efficiency scoring (0-100%)
-  - Real-time power output tracking
-  - Gear efficiency calculations
-  - Temperature monitoring and optimization
+## 🚀 Project Overview
 
-- **Adaptive Tuning**
-  - Two performance modes: EFFICIENCY and POWER
-  - Real-time recommendations for optimal performance
-  - Dynamic RPM range optimization
-  - Intelligent gear selection guidance
+A full-stack, real-time digital twin simulator of a V8 engine-powered car. This project combines:
 
-### 3. Advanced Visualization
+- ⚙️ **Physics-based engine and car dynamics simulation**
+- 🖥️ **Real-time 3D visualization with interactive controls**
+- 📊 **Live telemetry, analytics, and performance metrics**
+- 🌐 **RESTful backend with persistent session and state management**
+- 🧩 **Modular, extensible architecture for research and prototyping**
 
-- **3D Model Features**
+---
 
-  - Interactive transparent body for internal component viewing
-  - Temperature-based color changes for engine components
-  - Dynamic brake light system with realistic effects
-  - Real-time wheel rotation physics
+## 🏗️ Architecture
 
-- **Component Visualization**
-  - Engine parts with temperature-based color changes
-  - Interactive tooltips for component information
-  - Real-time status indicators
-  - Dynamic lighting effects
+```mermaid
+graph TD;
+  A[Frontend (Next.js + React + Three.js)] -->|HTTP/API| B[Backend (Node.js + MongoDB)]
+  B --> C[Database (MongoDB Collections)]
+```
 
-### 4. Dynamic Systems
+- **Frontend**: Interactive 3D visualization, UI controls, real-time telemetry
+- **Backend**: REST API for state, metrics, and analytics; MongoDB for persistence
+- **Physics Engine**: Custom logic for engine, transmission, temperature, fuel, and performance
 
-#### Temperature Management
+---
 
-- Operating range: 85-110°C
-- Color-coded temperature visualization
-- Real-time thermal feedback
-- Cooling system simulation
+## 🛠️ Technology Stack
 
-#### Brake System
+| Layer     | Technology                                                    |
+| --------- | ------------------------------------------------------------- |
+| Frontend  | Next.js 14.2.3, React 18, Three.js 0.169.0, React Three Fiber |
+| Styling   | Tailwind CSS 3.4.1, Radix UI, Lucide React                    |
+| Backend   | Node.js (API routes in Next.js), MongoDB 6.6.0                |
+| Utilities | UUID, Yarn, ESLint, PostCSS, Autoprefixer                     |
 
-- Response time: 0.1-0.3 seconds
-- Full release time: 10-20 seconds
-- Dynamic brake light effects
-  - Consistent red coloring
-  - Smooth intensity transitions
-  - Realistic light behavior
+---
 
-#### Performance Metrics
+## ✨ Features
 
-- **Speed Ranges**
+- **Physically-based V8 engine simulation**
+- **Interactive 3D car model with real-time feedback**
+- **Live telemetry dashboard and analytics**
+- **Session-based state persistence and metrics**
+- **Performance modes: Efficiency & Power**
+- **Dynamic temperature, fuel, and brake systems**
+- **Extensible UI and backend**
 
-  ```
-  0-100 hp:  140-180 km/h
-  100-200 hp: 180-230 km/h
-  200-300 hp: 230-260 km/h
-  300-400 hp: 260-290 km/h
-  400-500 hp: 290-310 km/h
-  500-600 hp: 310-325 km/h
-  600-700 hp: 325-350+ km/h
-  ```
+---
 
-- **Wheel RPM Mapping**
-  ```
-  0-10 km/h:   76 RPM
-  10-20 km/h:  152 RPM
-  20-30 km/h:  227 RPM
-  ...
-  90-100 km/h: 758 RPM
-  ```
+## ⚙️ Physics & Engine Simulation
 
-## Technical Implementation
+> Implemented in [`lib/carDynamics.js`](lib/carDynamics.js)
 
-### Core Technologies
+### Engine & Transmission
 
-- Next.js for the application framework
-- Three.js for 3D visualization
-- React Three Fiber for 3D rendering in React
-- Custom physics engine for real-time calculations
+- **Specs**: V8, 8 pistons, 2 strokes, idle 800 RPM, max 8400 RPM, 700hp, 850Nm
+- **Gearbox**: P, R, N, D, 1-5 with realistic gear ratios and final drive
+- **Horsepower-Speed Mapping**: Maps power output to speed bands
+- **Wheel RPM Mapping**: Maps speed to wheel RPM for animation
 
-### Key Components
+### Dynamic Systems
 
-#### CarDynamics Class
+- **Temperature**: Simulates heat buildup, cooling, and color-coded feedback
+- **Fuel System**: Tank size, consumption rate, range calculation
+- **Braking**: Hydraulic brake release, light effects, response time
+- **Pedal States**: Accelerator and brake, with real-time effect on simulation
 
-- Engine performance calculations
-- Real-time efficiency analysis
-- Temperature management
-- Fuel consumption modeling
+### Performance Analysis
 
-#### Visualization System
+- **Efficiency Scoring**: Real-time calculation based on RPM, temp, gear, and speed
+- **Mode Switching**: EFFICIENCY vs POWER, with dynamic recommendations
+- **History Tracking**: Stores recent RPM, temp, horsepower, and fuel data
 
-- Real-time 3D rendering
-- Dynamic material updates
-- Interactive component highlighting
-- Performance mode visualization
+#### Example: Calculating RPM
 
-#### Performance Monitoring
+```js
+const car = new CarDynamics();
+const rpm = car.calculateRPM(speed, gear, engineRunning);
+```
 
-- Real-time data collection
-- Dynamic recommendation system
-- Efficiency scoring
-- Performance mode switching
+---
 
-## Recent Implementations
+## 🖥️ 3D Visualization & UI Components
 
-### 1. Advanced Brake Light System
+> All UI and visualization logic is in [`components/`](components/)
 
-- Physically accurate light behavior
-- Smooth state transitions
-- Realistic material properties
-- Dynamic intensity control
+### Car & Scene
 
-### 2. Performance Analysis System
+- **CarModel.jsx**: Loads and animates the GLB 3D car model, applies temperature-based color changes, and updates wheel rotation.
+- **CarScene.jsx**: Sets up the Three.js scene, camera, lighting, and integrates the car model with physics and controls.
 
-- Real-time efficiency scoring
-- Dynamic recommendations
-- Mode-specific optimizations
-- Comprehensive metrics tracking
+### UI Components (in `components/ui/`)
 
-### 3. Temperature Visualization
+| Component                        | Description                                     |
+| -------------------------------- | ----------------------------------------------- |
+| Visualization.jsx                | Main 3D viewport and overlay logic              |
+| ControlPanel.jsx                 | Gear, mode, and engine controls                 |
+| PedalControls.jsx                | Accelerator and brake sliders                   |
+| CircularGauge.jsx                | Animated gauges for RPM, speed, temperature     |
+| Telemetry.jsx                    | Real-time data display (speed, RPM, temp, etc.) |
+| TelemetryChart.jsx               | Live-updating performance graphs                |
+| StatPanel.jsx                    | Key stats summary                               |
+| SoundSystem.jsx                  | Engine and environment audio feedback           |
+| HelpModal.jsx                    | In-app help and documentation                   |
+| button.jsx, slider.jsx, card.jsx | UI primitives                                   |
 
-- Component-specific color changes
-- Real-time temperature feedback
-- Thermal warning system
-- Mode-dependent thresholds
+### Effects
 
-## Creating Presentation Cards
+- **ParticleSystem.jsx**: Visual effects (e.g., exhaust, sparks)
 
-### Suggested Card Structure for gamma.ai
+---
 
-1. **Project Overview Card**
+## 🗄️ Backend API & Data Model
 
-   - Title: V8 Engine Digital Twin
-   - Key capabilities
-   - Visual: 3D engine model
+> Implemented in [`app/api/[[...path]]/route.js`](app/api/[[...path]]/route.js)
 
-2. **Engine Specifications Card**
+### Endpoints
 
-   - Technical specifications
-   - Performance ranges
-   - Visual: Specifications diagram
+| Method | Endpoint           | Description                             |
+| ------ | ------------------ | --------------------------------------- |
+| GET    | /api/              | API info                                |
+| POST   | /api/car-state     | Save car simulation state               |
+| GET    | /api/car-state     | List car states (optionally by session) |
+| GET    | /api/car-state/:id | Get specific car state                  |
+| GET    | /api/metrics       | Aggregated performance metrics          |
 
-3. **Real-time Analysis Card**
+### Data Model
 
-   - Performance monitoring
-   - Efficiency scoring
-   - Visual: Dashboard screenshot
+```js
+{
+  id: "uuid",
+  engineRunning: boolean,
+  currentGear: string,
+  speed: number,
+  rpm: number,
+  temperature: number,
+  fuel: number,
+  mileage: number,
+  timestamp: Date,
+  sessionId: "uuid"
+}
+```
 
-4. **Visualization Features Card**
+### Features
 
-   - 3D model features
-   - Component interaction
-   - Visual: Interactive components demo
+- **MongoDB**: Flexible, session-based storage
+- **CORS**: Universal API access
+- **Error Handling**: Robust, with status codes and messages
+- **Metrics**: Calculates averages, engine running %, and more
 
-5. **Dynamic Systems Card**
+#### Example: Saving Car State
 
-   - Temperature management
-   - Brake system
-   - Visual: Systems diagram
+```bash
+curl -X POST http://localhost:3000/api/car-state \
+  -H 'Content-Type: application/json' \
+  -d '{"engineRunning":true,"currentGear":"D","speed":120,"rpm":3500,"temperature":95,"fuel":60,"mileage":12345,"sessionId":"abc-123"}'
+```
 
-6. **Performance Metrics Card**
+---
 
-   - Speed ranges
-   - Power output
-   - Visual: Performance graphs
+## 📊 Data Analytics & Metrics
 
-7. **Technical Implementation Card**
+- **Real-time Logging**: Every simulation tick can be logged
+- **Session Analytics**: Multi-user, multi-session support
+- **Performance Metrics**: Speed, RPM, temperature, fuel, mileage
+- **Engine Running %**: Tracks usage and idling
+- **Historical Trends**: Enables time-series and trend analysis
 
-   - Core technologies
-   - Architecture
-   - Visual: System architecture diagram
+---
 
-8. **Recent Features Card**
-   - Brake light system
-   - Performance analysis
-   - Visual: Feature demonstrations
+## 🛠️ Setup & Development
 
-## Future Enhancements
+### Prerequisites
 
-- Weather condition impacts
-- Advanced fuel mapping
-- Extended sensor simulation
-- VR/AR integration capabilities
+- Node.js (v18+ recommended)
+- Yarn
+- MongoDB instance (local or cloud)
 
-## Getting Started
+### Installation
 
-1. Clone the repository
-2. Install dependencies: `yarn install`
-3. Run the development server: `yarn dev`
-4. Access the simulator at `localhost:3000`
-"# digital-twin-car" 
+1. **Clone the repository:**
+   ```bash
+   git clone <repo-url>
+   cd digital-twin
+   ```
+2. **Install dependencies:**
+   ```bash
+   yarn install
+   ```
+3. **Configure environment variables:**
+   - `MONGO_URL` — MongoDB connection string
+   - `DB_NAME` — Database name
+4. **Start the development server:**
+   ```bash
+   yarn dev
+   ```
+5. **Access the simulator:** [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🧩 Extensibility & Customization
+
+- **Physics Engine**: Add new sensors, tweak gear/fuel/thermal models in `lib/carDynamics.js`
+- **3D Models**: Replace or extend GLB models in `public/models/`
+- **UI Components**: Add new panels, charts, or controls in `components/ui/`
+- **API**: Add new endpoints or analytics in `app/api/[[...path]]/route.js`
+- **Styling**: Customize with Tailwind, Radix, and your own CSS
+
+---
+
+## 🩺 Troubleshooting & Tips
+
+- **MongoDB Connection**: Ensure your `MONGO_URL` and `DB_NAME` are correct and the DB is running
+- **3D Model Issues**: Check GLB file paths and Three.js logs for errors
+- **Performance**: Use browser dev tools and React Profiler for bottlenecks
+- **API Errors**: See server logs for stack traces and error details
+- **Hot Reload**: Next.js supports fast refresh for frontend changes
+
+---
+
+## 🌱 Future Enhancements
+
+- Weather/environmental simulation
+- Advanced fuel mapping and consumption models
+- Additional engine sensors and diagnostics
+- VR/AR integration for immersive experience
+- Export and import of simulation datasets
+
+---
+
+## 👤 Credits & License
+
+**Developed by Mohammed Arif.**
