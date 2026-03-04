@@ -24,6 +24,7 @@ export default function DigitalTwinCar() {
   const [acceleratorPosition, setAcceleratorPosition] = useState(0);
   const [brakePosition, setBrakePosition] = useState(0);
   const [currentHorsepower, setCurrentHorsepower] = useState(0);
+  const [shiftError, setShiftError] = useState(false);
 
   const vehicleDynamics = useRef(new CarDynamics()).current;
   const lastUpdateTime = useRef(Date.now());
@@ -82,10 +83,24 @@ export default function DigitalTwinCar() {
 
   const changeGear = useCallback((gear) => {
     if (!engineRunning && gear !== "P") return;
+
+    // Enforce sequential shifting for numeric gears (1-5)
+    const numericGears = ["1", "2", "3", "4", "5"];
+    const currentIdx = numericGears.indexOf(currentGear);
+    const targetIdx = numericGears.indexOf(gear);
+
+    if (currentIdx !== -1 && targetIdx !== -1) {
+      if (Math.abs(targetIdx - currentIdx) > 1) {
+        setShiftError(true);
+        setTimeout(() => setShiftError(false), 1500);
+        return;
+      }
+    }
+
     setIsShifting(true);
     setCurrentGear(gear);
     setTimeout(() => setIsShifting(false), 500);
-  }, [engineRunning]);
+  }, [engineRunning, currentGear]);
 
   const resetVehicle = useCallback(() => {
     setEngineRunning(false); setCurrentGear("P"); setVehicleSpeed(0);
@@ -343,6 +358,14 @@ export default function DigitalTwinCar() {
         acceleratorPosition={acceleratorPosition}
       />
       <HelpModal showHelp={showHelp} setShowHelp={setShowHelp} />
+
+      {/* Shift Error Overlay */}
+      <div className={`fixed inset-0 z-[100] flex items-center justify-center pointer-events-none transition-opacity duration-300 ${shiftError ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="bg-red-600/20 border border-red-500/50 backdrop-blur-md px-8 py-4 rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+          <div className="text-red-400 font-mono font-bold text-lg tracking-widest uppercase">Invalid Gear Jump</div>
+          <div className="text-red-300/60 font-mono text-center text-xs mt-1">Sequential Shifting Only (±1)</div>
+        </div>
+      </div>
     </div>
   );
 }
