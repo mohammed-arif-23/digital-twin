@@ -45,25 +45,25 @@ export function CarScene({
     if (camera && cameraPositions[viewMode]) {
       console.log('CarScene: Setting camera position to', cameraPositions[viewMode]);
       setIsTransitioning(true);
-      
+
       const targetPosition = new THREE.Vector3(...cameraPositions[viewMode]);
       const targetLookAt = new THREE.Vector3(...cameraTargets[viewMode]);
-      
+
       if (orbitControlsRef.current) {
         orbitControlsRef.current.enabled = false;
       }
-      
+
       camera.position.copy(targetPosition);
       camera.lookAt(targetLookAt);
       camera.updateMatrixWorld();
-      
+
       console.log('CarScene: Camera position set to', camera.position);
       console.log('CarScene: Camera target set to', targetLookAt);
-      
+
       if (orbitControlsRef.current) {
         orbitControlsRef.current.target.copy(targetLookAt);
         orbitControlsRef.current.update();
-        
+
         setTimeout(() => {
           orbitControlsRef.current.enabled = true;
           setIsTransitioning(false);
@@ -143,7 +143,8 @@ export function CarScene({
     if (groupRef.current && engineRunning && speed > 0) {
       const isReverse = currentGear === "R";
       const direction = isReverse ? -1 : 1;
-      const speedMS = (speed * 1.60934) / 3.6;
+      // speed is now in m/s directly from physics model
+      const speedMS = speed;
       trackPositionRef.current += speedMS * delta * direction;
       if (trackMarkingsRef.current) {
         trackMarkingsRef.current.position.z = trackPositionRef.current;
@@ -159,15 +160,15 @@ export function CarScene({
       const tilt = Math.min(speed * 0.0002, 0.01);
       groupRef.current.rotation.x = isReverse ? tilt : -tilt;
     }
-    const shouldGenerateSmoke = brakePosition > 40 && speed > 50;
+    const shouldGenerateSmoke = brakePosition > 40 && speed > 22; // 22 m/s ≈ 80 km/h
     if (shouldGenerateSmoke && Math.random() < 0.4) {
-      const smokeIntensity = Math.min((brakePosition / 100) * (speed / 80), 1);
+      const smokeIntensity = Math.min((brakePosition / 100) * (speed / 36), 1); // 36 m/s ≈ 130 km/h
       const wheelData = [
         {
           pos: new THREE.Vector3(-0.6, -0.8, 1.2),
           side: "left",
           intensity: smokeIntensity * 0.3,
-          },
+        },
         {
           pos: new THREE.Vector3(0.6, -0.8, 1.2),
           side: "right",
@@ -281,17 +282,17 @@ export function CarScene({
           temperature={temperature}
           brakePosition={brakePosition}
         />
-        {brakePosition > 40 && speed > 50 && (
+        {brakePosition > 40 && speed > 22 && (
           <>
             <TireSmoke
               active={true}
-              intensity={Math.min((brakePosition / 100) * (speed / 80), 1)}
+              intensity={Math.min((brakePosition / 100) * (speed / 36), 1)}
               position={new THREE.Vector3(-0.6, -0.8, -1.2)}
               side="left"
             />
             <TireSmoke
               active={true}
-              intensity={Math.min((brakePosition / 100) * (speed / 80), 1)}
+              intensity={Math.min((brakePosition / 100) * (speed / 36), 1)}
               position={new THREE.Vector3(0.6, -0.8, -1.2)}
               side="right"
             />
